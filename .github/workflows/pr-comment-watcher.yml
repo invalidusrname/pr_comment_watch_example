@@ -26,13 +26,13 @@ jobs:
           fi
 
       - uses: peter-evans/create-or-update-comment@v2
-        if: ${{ steps.deploy-branch.outputs.NAME == "EMPTY" }}
+        if: ${{ steps.deploy-branch.outputs.NAME != 'EMPTY' }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: +1
 
       - uses: peter-evans/create-or-update-comment@v2
-        if: ${{ steps.deploy-branch.outputs.NAME == "" }}
+        if: ${{ steps.deploy-branch.outputs.NAME == '' }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: -1
@@ -44,12 +44,12 @@ jobs:
 
       - name: Testing if output true
         id: test-if-commit-to-branch
-        if: ${{ steps.deploy-branch.outputs.NAME != "" }}
+        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
         run: |
           echo "NAME is not empty: ${{ steps.deploy-branch.outputs.NAME }}"
 
       - name: Testing if output false
         id: test-if-commit-to-branch
-        if: ${{ steps.deploy-branch.outputs.NAME == "" }}
+        if: ${{ steps.deploy-branch.outputs.NAME == '' }}
         run: |
           echo "NAME is empty: ${{ steps.deploy-branch.outputs.NAME }}"
