@@ -60,10 +60,10 @@ jobs:
       - uses: peter-evans/create-or-update-comment@v2
         if: success()
         with:
-          issue-number: ${{ github.event.issue.pull_request.id }}
+          issue-number: ${{ github.event.issue.pull_request.number }}
           body: "Pushed to this branch successfully to ${{ steps.deploy-branch.outputs.NAME }}. Check CI for further build info"
       - uses: peter-evans/create-or-update-comment@v2
         if: failure()
         with:
-          issue-number: ${{ github.event.issue.pull_request.id }}
+          issue-number: ${{ github.event.issue.pull_request.number }}
           body: "Could not push this branch to ${{ steps.deploy-branch.outputs.NAME }}. Check the Github Actions Workflow Logs for more details"
