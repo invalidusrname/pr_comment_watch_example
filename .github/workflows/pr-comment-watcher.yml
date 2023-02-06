@@ -22,43 +22,30 @@ jobs:
           COMMENT="${{github.event.comment.body}}"
           COMMENT_BRANCH=$(echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}')
 
-
-          echo $COMMENT
-          echo "-------"
-          echo $COMMENT_BRANCH
-          echo "-------"
-
           if [[ $COMMENT_BRANCH == qa* ]]; then
             echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
           else
             echo "NAME=''" >> $GITHUB_OUTPUT
           fi
-
       - uses: peter-evans/create-or-update-comment@v2
-        if: ${{ steps.deploy-branch.outputs.NAME != 'EMPTY' }}
+        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: "+1"
-
       - uses: peter-evans/create-or-update-comment@v2
         if: ${{ steps.deploy-branch.outputs.NAME == '' }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: "-1"
-
-      - name: Commit to branch
-        id: commit-to-branch
+      - name: Push to QA Branch
+        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
+        id: push-current-branch-to-qa-branch
         run: |
           echo "The value of NAME: ${{ steps.deploy-branch.outputs.NAME }}"
+          echo "pushing $CURR_BRANCH to $QA_ENV"
 
-      - name: Testing if output true
-        id: test-if-commit-to-branch-wut
-        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
-        run: |
-          echo "NAME is not empty: ${{ steps.deploy-branch.outputs.NAME }}"
+          QA_BRANCH="${{ steps.deploy-branch.outputs.NAME }}""
 
-      - name: Testing if output false
-        id: test-if-commit-to-branch-false
-        if: ${{ steps.deploy-branch.outputs.NAME == '' }}
-        run: |
-          echo "NAME is empty: ${{ steps.deploy-branch.outputs.NAME }}"
+          env | sort
+
+          # git push --force origin "$CURR_BRANCH":"$QA_ENV"
