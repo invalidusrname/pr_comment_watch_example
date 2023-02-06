@@ -62,10 +62,10 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Pushed to this branch successfully to ${{ steps.deploy-branch.outputs.NAME }}. Check CI for further build info
+            I have pushed this branch successfully to ${{ steps.deploy-branch.outputs.NAME }}. Check CI build logs for more details
       - name: Failure Comment
         if: failure()
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Could not push this branch to ${{ steps.deploy-branch.outputs.NAME }}. Check the Github Actions Workflow Logs for more details
+            I could not push this branch to ${{ steps.deploy-branch.outputs.NAME }}. Check the Github Actions Workflow logs for more details
