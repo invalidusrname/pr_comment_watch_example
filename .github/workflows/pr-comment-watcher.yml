@@ -55,6 +55,7 @@ jobs:
           fi
 
           echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
+
           git push --force origin "$CURRENT_BRANCH":"$QA_BRANCH"
       - uses: peter-evans/create-or-update-comment@v2
         if: success()
