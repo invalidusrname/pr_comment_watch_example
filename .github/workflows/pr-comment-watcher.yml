@@ -43,7 +43,7 @@ jobs:
           echo "The value of NAME: ${{ steps.deploy-branch.outputs.NAME }}"
 
       - name: Testing if output true
-        id: test-if-commit-to-branch
+        id: test-if-commit-to-branch-wut
         if: ${{ steps.deploy-branch.outputs.NAME != '' }}
         run: |
           echo "NAME is not empty: ${{ steps.deploy-branch.outputs.NAME }}"
