@@ -54,22 +54,18 @@ jobs:
             exit 1
           fi
 
-          echo "PR NUMBER: ${{ github.event.pull_request.number }}"
-          echo "ISSUE PR        ${{ github.event.issue.pull_request }}"
-          echo "i PR number ${{ github.event.issue.pull_request.number }}"
-          echo "i PR id     ${{ github.event.issue.pull_request.id }}"
-          echo "event number     ${{ github.event.number }}"
-
           echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
 
           git push --force origin "$CURRENT_BRANCH":"$QA_BRANCH"
-      - uses: peter-evans/create-or-update-comment@v2
+      - name: Successful Comment
         if: success()
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: "Pushed to this branch successfully to ${{ steps.deploy-branch.outputs.NAME }}. Check CI for further build info"
-      - uses: peter-evans/create-or-update-comment@v2
+          message: |
+            Pushed to this branch successfully to ${{ steps.deploy-branch.outputs.NAME }}. Check CI for further build info
+      - name: Failure Comment
         if: failure()
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: "Could not push this branch to ${{ steps.deploy-branch.outputs.NAME }}. Check the Github Actions Workflow Logs for more details"
+          message: |
+            Could not push this branch to ${{ steps.deploy-branch.outputs.NAME }}. Check the Github Actions Workflow Logs for more details
