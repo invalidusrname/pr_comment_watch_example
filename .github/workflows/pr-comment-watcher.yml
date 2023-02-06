@@ -17,7 +17,13 @@ jobs:
         id: deploy-branch
         run: |
           COMMENT="${{github.event.comment.body}}"
-          COMMENT_BRANCH=echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}'
+          COMMENT_BRANCH=$(echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}')
+
+
+          echo $COMMENT
+          echo "-------"
+          echo $COMMENT_BRANCH
+          echo "-------"
 
           if [[ $COMMENT_BRANCH == qa* ]]; then
             echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
