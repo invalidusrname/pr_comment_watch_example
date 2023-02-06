@@ -17,7 +17,13 @@ jobs:
         id: deploy-branch
         run: |
           COMMENT="${{github.event.comment.body}}"
-          COMMENT_BRANCH=echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}'
+          COMMENT_BRANCH=$(echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}')
+
+
+          echo $COMMENT
+          echo "-------"
+          echo $COMMENT_BRANCH
+          echo "-------"
 
           if [[ $COMMENT_BRANCH == qa* ]]; then
             echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
@@ -26,13 +32,13 @@ jobs:
           fi
 
       - uses: peter-evans/create-or-update-comment@v2
-        if: steps.deploy-branch.outputs.NAME != ""
+        if: ${{ steps.deploy-branch.outputs.NAME != 'EMPTY' }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: +1
 
       - uses: peter-evans/create-or-update-comment@v2
-        if: steps.deploy-branch.outputs.NAME == ""
+        if: ${{ steps.deploy-branch.outputs.NAME == '' }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: -1
@@ -43,13 +49,13 @@ jobs:
           echo "The value of NAME: ${{ steps.deploy-branch.outputs.NAME }}"
 
       - name: Testing if output true
-        id: test-if-commit-to-branch
-        if: steps.deploy-branch.outputs.NAME != ""
+        id: test-if-commit-to-branch-wut
+        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
         run: |
           echo "NAME is not empty: ${{ steps.deploy-branch.outputs.NAME }}"
 
       - name: Testing if output false
-        id: test-if-commit-to-branch
-        if: steps.deploy-branch.outputs.NAME == ""
+        id: test-if-commit-to-branch-false
+        if: ${{ steps.deploy-branch.outputs.NAME == '' }}
         run: |
           echo "NAME is empty: ${{ steps.deploy-branch.outputs.NAME }}"
