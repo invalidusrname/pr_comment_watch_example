@@ -2,6 +2,9 @@ name: Send Branch to QA
 on:
   issue_comment:
     types: [created]
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   send-branch-to-qa:
     if: ${{ startsWith(github.event.comment.body, '/deploy qa') &&  github.event.issue.pull_request }}
