@@ -49,7 +49,7 @@ jobs:
           echo "NAME is not empty: ${{ steps.deploy-branch.outputs.NAME }}"
 
       - name: Testing if output false
-        id: test-if-commit-to-branch
+        id: test-if-commit-to-branch-false
         if: ${{ steps.deploy-branch.outputs.NAME == '' }}
         run: |
           echo "NAME is empty: ${{ steps.deploy-branch.outputs.NAME }}"
