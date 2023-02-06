@@ -1,0 +1,55 @@
+name: Send Branch to QA
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  send-branch-to-qa:
+    if: ${{ startsWith(github.event.comment.body, '/deploy') &&  github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: xt0rted/pull-request-comment-branch@v1
+        id: comment-branch
+      - uses: actions/checkout@v3
+        if: success()
+        with:
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
+      - name: Determine Deployment branch
+        id: deploy-branch
+        run: |
+          COMMENT="${{(github.event.comment.body}}"
+          COMMENT_BRANCH=echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}'
+
+          if [[ $COMMENT_BRANCH == qa* ]]; then
+            echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
+          else
+            echo "NAME=''" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: peter-evans/create-or-update-comment@v2
+        if: steps.deploy-branch.outputs.NAME != ""
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: +1
+
+      - uses: peter-evans/create-or-update-comment@v2
+        if: steps.deploy-branch.outputs.NAME == ""
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: -1
+
+      - name: Commit to branch
+        id: commit-to-branch
+        run: |
+          echo "The value of NAME: ${{ steps.deploy-branch.outputs.NAME }}"
+
+      - name: Testing if output true
+        id: test-if-commit-to-branch
+        if: steps.deploy-branch.outputs.NAME != ""
+        run: |
+          echo "NAME is not empty: ${{ steps.deploy-branch.outputs.NAME }}"
+
+      - name: Testing if output false
+        id: test-if-commit-to-branch
+        if: steps.deploy-branch.outputs.NAME == ""
+        run: |
+          echo "NAME is empty: ${{ steps.deploy-branch.outputs.NAME }}"
