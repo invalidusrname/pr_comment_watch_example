@@ -54,7 +54,8 @@ jobs:
             exit 1
           fi
 
-          echo "PULL REQUEST NUMBER: ${{ github.event.pull_request.number }}"
+          echo "PR NUMBER: ${{ github.event.pull_request.number }}"
+          echo "PR ${{ github.event.issue.pull_request }}"
 
           echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
 
