@@ -54,6 +54,8 @@ jobs:
             exit 1
           fi
 
+          echo "PULL REQUEST NUMBER: ${{ github.event.pull_request.number }}"
+
           echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
 
           git push --force origin "$CURRENT_BRANCH":"$QA_BRANCH"
