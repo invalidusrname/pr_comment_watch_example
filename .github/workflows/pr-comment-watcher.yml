@@ -22,11 +22,11 @@ jobs:
           if [[ $COMMENT_BRANCH == qa* ]]; then
             echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
           else
-            echo "NAME=''" >> $GITHUB_OUTPUT
+            echo "NAME='EMPTY'" >> $GITHUB_OUTPUT
           fi
 
       - uses: peter-evans/create-or-update-comment@v2
-        if: ${{ steps.deploy-branch.outputs.NAME != "" }}
+        if: ${{ steps.deploy-branch.outputs.NAME == "EMPTY" }}
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: +1
