@@ -44,7 +44,7 @@ jobs:
           echo "The value of NAME: ${{ steps.deploy-branch.outputs.NAME }}"
           echo "pushing $CURR_BRANCH to $QA_ENV"
 
-          QA_BRANCH="${{ steps.deploy-branch.outputs.NAME }}""
+          QA_BRANCH="${{ steps.deploy-branch.outputs.NAME }}"
 
           env | sort
 
