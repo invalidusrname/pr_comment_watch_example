@@ -46,6 +46,7 @@ jobs:
 
           QA_BRANCH="${{ steps.deploy-branch.outputs.NAME }}"
 
-          env | sort
+          git status
+          git branch
 
           # git push --force origin "$CURR_BRANCH":"$QA_ENV"
