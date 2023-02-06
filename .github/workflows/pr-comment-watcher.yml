@@ -58,6 +58,7 @@ jobs:
           echo "ISSUE PR        ${{ github.event.issue.pull_request }}"
           echo "i PR number ${{ github.event.issue.pull_request.number }}"
           echo "i PR id     ${{ github.event.issue.pull_request.id }}"
+          echo "event number     ${{ github.event.number }}"
 
           echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
 
