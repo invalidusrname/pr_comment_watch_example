@@ -13,7 +13,7 @@ jobs:
       PR_NUMBER: ${{github.event.issue.number}}
       WORKFLOW_LINK: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       GH_TOKEN: ${{ github.token }}
-      CI_LINK: "https://app.circleci.com/pipelines/github/NomadHealth/${{ github.repository }}"
+      CI_LINK: "https://app.circleci.com/pipelines/github/${{ github.repository_owner }}/${{ github.repository }}"
     steps:
       - uses: actions/checkout@v3
       - name: Determine Deployment branch
