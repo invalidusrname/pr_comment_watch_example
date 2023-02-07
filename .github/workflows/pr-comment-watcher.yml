@@ -78,7 +78,7 @@ jobs:
 
           git push --force origin "$CURRENT_BRANCH":"$DEPLOYMENT_BRANCH"
       - name: Create Successful Comment
-        if: success()
+        if: steps.push-current-branch-to-qa-branch.build.outcome == 'success'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
@@ -86,7 +86,7 @@ jobs:
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
-        if: failure()
+        if: steps.push-current-branch-to-qa-branch.build.outcome != 'success'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
