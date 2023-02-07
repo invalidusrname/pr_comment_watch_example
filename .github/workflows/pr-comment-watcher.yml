@@ -78,6 +78,9 @@ jobs:
           echo "pushing $CURRENT_BRANCH to $DEPLOYMENT_BRANCH"
 
           git push --force origin "$CURRENT_BRANCH":"$DEPLOYMENT_BRANCH"
+      - name: debugging
+        run: |
+          echo "push-current-branch-to-qa-branch outcome: ${{steps.push-current-branch-to-qa-branch.build.outcome}}"
       - name: Create Successful Comment
         if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} == 'success'
         env:
