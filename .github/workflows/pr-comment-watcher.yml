@@ -13,7 +13,7 @@ jobs:
       PR_NUMBER: ${{github.event.issue.number}}
       WORKFLOW_LINK: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       GH_TOKEN: ${{ github.token }}
-      CI_LINK: "https://app.circleci.com/pipelines/github/${{ github.repository_owner }}/${{ github.repository }}"
+      CI_LINK: "https://app.circleci.com/pipelines/github/${{ github.repository }}"
     steps:
       - uses: actions/checkout@v3
       - name: Determine Deployment branch
@@ -79,7 +79,7 @@ jobs:
 
           git push --force origin "$CURRENT_BRANCH":"$DEPLOYMENT_BRANCH"
       - name: Create Successful Comment
-        if: steps.push-current-branch-to-qa-branch.build.outcome == 'success'
+        if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} == 'success'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
@@ -88,7 +88,7 @@ jobs:
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
-        if: steps.push-current-branch-to-qa-branch.build.outcome != 'success'
+        if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} != 'success'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
