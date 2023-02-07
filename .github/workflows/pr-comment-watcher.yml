@@ -86,6 +86,7 @@ jobs:
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
+            echo ${{steps.push-current-branch-to-qa-branch.outcome}}
             CI_LINK="${CI_LINK}?branch=${BRANCH}"
             BODY="I have pushed this branch successfully to $BRANCH. Check [CI build logs]($CI_LINK) for more details"
 
@@ -95,6 +96,7 @@ jobs:
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
+            echo ${{steps.push-current-branch-to-qa-branch.outcome}}
             BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
