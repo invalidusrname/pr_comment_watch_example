@@ -40,24 +40,28 @@ jobs:
         if: steps.determine-deployment-branch.outputs.NAME == ''
         with:
           script: |
-            const {owner, repo} = context.issue
-            github.reactions.createForIssueComment({
-              owner,
-              repo,
-              comment_id: context.payload.comment.id,
-              content: "-1",
-            });
+            try {
+              await github.rest.reactions.createForIssueComment({
+                ...context.repo,
+                comment_id: context.payload.comment.id,
+                content: '-1',
+              });
+            catch (err) {
+              core.setFailed(`Request failed with error ${err}`)
+            }
       - uses: actions/github-script@v6
         if: steps.determine-deployment-branch.outputs.NAME != ''
         with:
           script: |
-            const {owner, repo} = context.issue
-            github.reactions.createForIssueComment({
-              owner,
-              repo,
-              comment_id: context.payload.comment.id,
-              content: "+1",
-            });
+            try {
+              await github.rest.reactions.createForIssueComment({
+                ...context.repo,
+                comment_id: context.payload.comment.id,
+                content: '+1',
+              });
+            catch (err) {
+              core.setFailed(`Request failed with error ${err}`)
+            }
       - name: Push to QA Branch
         if: steps.determine-deployment-branch.outputs.NAME != ''
         id: push-current-branch-to-qa-branch
