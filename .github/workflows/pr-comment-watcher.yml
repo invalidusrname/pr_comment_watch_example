@@ -13,6 +13,7 @@ jobs:
       PR_NUMBER: ${{github.event.issue.number}}
       WORKFLOW_LINK: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       GH_TOKEN: ${{ github.token }}
+      CI_LINK: "https://app.circleci.com/pipelines/github/NomadHealth/${{ github.repository }}"
     steps:
       - uses: actions/checkout@v3
       - name: Determine Deployment branch
@@ -82,7 +83,8 @@ jobs:
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            BODY="I have pushed this branch successfully to $BRANCH. Check CI build logs for more details"
+            CI_LINK="${CI_LINK}?branch=${BRANCH}"
+            BODY="I have pushed this branch successfully to $BRANCH. Check [CI build logs]($CI_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
