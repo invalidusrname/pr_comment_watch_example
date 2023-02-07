@@ -28,8 +28,9 @@ jobs:
           fi
       - name: Unable to Determine Determine Branch
         if: failure()
+        env:
+          BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
             BODY="Unable to determine branch to deploy. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body $BODY
@@ -67,13 +68,16 @@ jobs:
           git push --force origin "$CURRENT_BRANCH":"$QA_BRANCH"
       - name: Create Successful Comment
         if: success()
+        env:
+          BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
             BODY="I have pushed this branch successfully to $BRANCH. Check CI build logs for more details"
 
             gh issue comment $PR_NUMBER --body $BODY
       - name: Add Failure Comment
         if: failure()
+        env:
+          BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
             BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
             BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details
