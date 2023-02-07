@@ -10,8 +10,9 @@ jobs:
     if: ${{ startsWith(github.event.comment.body, '/deploy qa') && github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     env:
-      PR_NUMBER: "${{github.event.issue.number}}"
+      PR_NUMBER: ${{github.event.issue.number}}
       WORKFLOW_LINK: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v3
       - name: Determine Deployment branch
