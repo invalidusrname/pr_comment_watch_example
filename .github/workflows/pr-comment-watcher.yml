@@ -80,9 +80,9 @@ jobs:
           git push --force origin "$CURRENT_BRANCH":"$DEPLOYMENT_BRANCH"
       - name: debugging
         run: |
-          echo "push-current-branch-to-qa-branch outcome: ${{steps.push-current-branch-to-qa-branch.build.outcome}}"
+          echo "push-current-branch-to-qa-branch outcome: ${{steps.push-current-branch-to-qa-branch.outcome}}"
       - name: Create Successful Comment
-        if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} == 'success'
+        if: ${{steps.push-current-branch-to-qa-branch.outcome}} == 'success'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
@@ -91,11 +91,10 @@ jobs:
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
-        if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} == 'failure'
+        if: ${{steps.push-current-branch-to-qa-branch.outcome}} == 'failure'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
             BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
