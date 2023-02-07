@@ -22,14 +22,14 @@ jobs:
           COMMENT_BRANCH=$(echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}')
 
           if [[ $COMMENT_BRANCH == qa* ]]; then
+            echo "DETERMINED BRANCH!: $COMMENT_BRANCH"
             echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
           else
+            echo "COULD NOT DETERMINE BRANCH!: $COMMENT_BRANCH"
             echo "NAME=''" >> $GITHUB_OUTPUT
           fi
       - name: Unable to Determine Determine Branch
         if: failure()
-        env:
-          BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
             BODY="Unable to determine branch to deploy. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
