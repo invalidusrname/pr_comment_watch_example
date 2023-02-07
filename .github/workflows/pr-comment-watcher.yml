@@ -93,6 +93,6 @@ jobs:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
             BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
-            BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details
+            BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
