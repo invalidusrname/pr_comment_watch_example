@@ -88,7 +88,7 @@ jobs:
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
-        if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} != 'success'
+        if: ${{steps.push-current-branch-to-qa-branch.build.outcome}} == 'failure'
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
