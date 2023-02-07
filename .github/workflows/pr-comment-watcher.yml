@@ -10,14 +10,9 @@ jobs:
     if: ${{ startsWith(github.event.comment.body, '/deploy qa') && github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     steps:
-      - uses: xt0rted/pull-request-comment-branch@v1
-        id: comment-branch
       - uses: actions/checkout@v3
-        if: success()
-        with:
-          ref: ${{ steps.comment-branch.outputs.head_ref }}
       - name: Determine Deployment branch
-        id: deploy-branch
+        id: determine-deployment-branch
         run: |
           COMMENT="${{github.event.comment.body}}"
           COMMENT_BRANCH=$(echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}')
@@ -27,22 +22,37 @@ jobs:
           else
             echo "NAME=''" >> $GITHUB_OUTPUT
           fi
-      - uses: peter-evans/create-or-update-comment@v2
-        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
+      - uses: actions/github-script@v4
+        if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
         with:
-          comment-id: ${{ github.event.comment.id }}
-          reactions: "+1"
-      - uses: peter-evans/create-or-update-comment@v2
-        if: ${{ steps.deploy-branch.outputs.NAME == '' }}
-        with:
-          comment-id: ${{ github.event.comment.id }}
-          reactions: "-1"
+          script: |
+            const {owner, repo} = context.issue
+            github.reactions.createForIssueComment({
+              owner,
+              repo,
+              comment_id: context.payload.comment.id,
+              content: "+1",
+            });
+      - name: DEBUG
+        run: |
+            echo "event.issue.html_url: ${{github.event.issue.html_url}}"
+            echo "event.issue.number: ${{github.event.issue.number}}"
+            echo "event.issue.id: ${{github.event.issue.id}}"
+            echo "event.issue.pull_request: ${{github.event.issue.pull_request}}""
+            echo "event.issue.pull_request.id: ${{github.event.issue.pull_request.id}}""
+            echo "event.issue.pull_request.number: ${{github.event.issue.pull_request.number}}""
+
+            #gh issue comment $ISSUE --body "Thank you for opening this issue!"
+            #I could not push this branch to ${{ steps.determine-deployment-branch.outputs.NAME }}. Check the Github Actions Workflow logs for more details
+
       - name: Push to QA Branch
-        if: ${{ steps.deploy-branch.outputs.NAME != '' }}
+        if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
         id: push-current-branch-to-qa-branch
         run: |
+          gh pr checkout ${{github.event.issue.number}}
+
           CURRENT_BRANCH=$(git branch --show-current)
-          QA_BRANCH="${{ steps.deploy-branch.outputs.NAME }}"
+          QA_BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
 
           if [[ "$QA_BRANCH" == "master" ]]; then
             echo "can't force push to master"
@@ -62,10 +72,10 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            I have pushed this branch successfully to ${{ steps.deploy-branch.outputs.NAME }}. Check CI build logs for more details
+            I have pushed this branch successfully to ${{ steps.determine-deployment-branch.outputs.NAME }}. Check CI build logs for more details
       - name: Failure Comment
         if: failure()
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            I could not push this branch to ${{ steps.deploy-branch.outputs.NAME }}. Check the Github Actions Workflow logs for more details
+            I could not push this branch to ${{ steps.determine-deployment-branch.outputs.NAME }}. Check the Github Actions Workflow logs for more details
