@@ -8,7 +8,7 @@ permissions:
 jobs:
   send-branch-to-qa:
     if: startsWith(github.event.comment.body, '/deploy qa') && github.event.issue.pull_request
-  runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04
     env:
       PR_NUMBER: ${{github.event.issue.number}}
       WORKFLOW_LINK: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
