@@ -85,21 +85,19 @@ jobs:
           echo "SUCCESS?: ${{steps.push-current-branch-to-qa-branch.outcome == 'success'}}"
           echo "FAILURE?: ${{steps.push-current-branch-to-qa-branch.outcome == 'failure'}}"
       - name: Create Successful Comment
-        if: ${{steps.push-current-branch-to-qa-branch.outcome == 'success'}}
+        if: ${{ steps.push-current-branch-to-qa-branch.outcome == 'success' }}
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            echo ${{ steps.push-current-branch-to-qa-branch.outcome }}
             CI_LINK="${CI_LINK}?branch=${BRANCH}"
             BODY="I have pushed this branch successfully to $BRANCH. Check [CI build logs]($CI_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
-        if: ${{steps.push-current-branch-to-qa-branch.outcome == 'failure'}}
+        if: ${{ steps.push-current-branch-to-qa-branch.outcome == 'failure' }}
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            echo ${{steps.push-current-branch-to-qa-branch.outcome}}
             BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
