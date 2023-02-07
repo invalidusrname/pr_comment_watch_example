@@ -46,8 +46,9 @@ jobs:
                 comment_id: context.payload.comment.id,
                 content: '-1',
               });
+            }
             catch (err) {
-              core.setFailed(`Request failed with error ${err}`)
+              core.setFailed(`Request failed with error ${err}`);
             }
       - uses: actions/github-script@v6
         if: steps.determine-deployment-branch.outputs.NAME != ''
@@ -59,8 +60,9 @@ jobs:
                 comment_id: context.payload.comment.id,
                 content: '+1',
               });
+            }
             catch (err) {
-              core.setFailed(`Request failed with error ${err}`)
+              core.setFailed(`Request failed with error ${err}`);
             }
       - name: Push to QA Branch
         if: steps.determine-deployment-branch.outputs.NAME != ''
