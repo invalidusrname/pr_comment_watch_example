@@ -22,18 +22,29 @@ jobs:
           COMMENT_BRANCH=$(echo $COMMENT | sed -r "s/.*\/deploy (qa[-0-9a-zA-Z]+).*/\1/" | awk '{print tolower($0)}')
 
           if [[ $COMMENT_BRANCH == qa* ]]; then
-            echo "DETERMINED BRANCH!: $COMMENT_BRANCH"
+            echo "DETERMINED COMMENT BRANCH!: $COMMENT_BRANCH"
             echo "NAME=$COMMENT_BRANCH" >> $GITHUB_OUTPUT
           else
-            echo "COULD NOT DETERMINE BRANCH!: $COMMENT_BRANCH"
-            echo "NAME=''" >> $GITHUB_OUTPUT
+            echo "COULD NOT DETERMINE COMMENT BRANCH!: $COMMENT_BRANCH"
+            echo "NAME=" >> $GITHUB_OUTPUT
           fi
       - name: Unable to Determine Determine Branch
-        if: failure()
+        if: ${{ steps.determine-deployment-branch.outputs.NAME == '' }}
         run: |
             BODY="Unable to determine branch to deploy. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body $BODY
+      - uses: actions/github-script@v4
+        if: ${{ steps.determine-deployment-branch.outputs.NAME == '' }}
+        with:
+          script: |
+            const {owner, repo} = context.issue
+            github.reactions.createForIssueComment({
+              owner,
+              repo,
+              comment_id: context.payload.comment.id,
+              content: "-1",
+            });
       - uses: actions/github-script@v4
         if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
         with:
@@ -52,20 +63,20 @@ jobs:
           gh pr checkout $PR_NUMBER
 
           CURRENT_BRANCH=$(git branch --show-current)
-          QA_BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
+          DEPLOYMENT_BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
 
-          if [[ "$QA_BRANCH" == "master" ]]; then
+          if [[ "$DEPLOYMENT_BRANCH" == "master" ]]; then
             echo "can't force push to master"
             exit 1
           fi
 
-          if [[ "$QA_BRANCH" == "main" ]]; then
+          if [[ "$DEPLOYMENT_BRANCH" == "main" ]]; then
             echo "can't force push to main"
             exit 1
           fi
-          echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
+          echo "pushing $CURRENT_BRANCH to $DEPLOYMENT_BRANCH"
 
-          git push --force origin "$CURRENT_BRANCH":"$QA_BRANCH"
+          git push --force origin "$CURRENT_BRANCH":"$DEPLOYMENT_BRANCH"
       - name: Create Successful Comment
         if: success()
         env:
