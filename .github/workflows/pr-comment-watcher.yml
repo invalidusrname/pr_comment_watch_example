@@ -9,6 +9,9 @@ jobs:
   send-branch-to-qa:
     if: ${{ startsWith(github.event.comment.body, '/deploy qa') && github.event.issue.pull_request }}
     runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: "${{gihhub.event.issue.number}}"
+      WORKFLOW_LINK: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
     steps:
       - uses: actions/checkout@v3
       - name: Determine Deployment branch
@@ -22,6 +25,13 @@ jobs:
           else
             echo "NAME=''" >> $GITHUB_OUTPUT
           fi
+      - name: Unable to Determine Determine Branch
+        if: failure()
+        run: |
+            BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
+            BODY="Unable to determine branch to deploy. Check the [Workflow log]($WORKFLOW_LINK) for more details"
+
+            gh issue comment $PR_NUMBER --body $BODY
       - uses: actions/github-script@v4
         if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
         with:
@@ -33,23 +43,11 @@ jobs:
               comment_id: context.payload.comment.id,
               content: "+1",
             });
-      - name: DEBUG
-        run: |
-            echo "event.issue.html_url: ${{github.event.issue.html_url}}"
-            echo "event.issue.number: ${{github.event.issue.number}}"
-            echo "event.issue.id: ${{github.event.issue.id}}"
-            echo "event.issue.pull_request: ${{github.event.issue.pull_request}}""
-            echo "event.issue.pull_request.id: ${{github.event.issue.pull_request.id}}""
-            echo "event.issue.pull_request.number: ${{github.event.issue.pull_request.number}}""
-
-            #gh issue comment $ISSUE --body "Thank you for opening this issue!"
-            #I could not push this branch to ${{ steps.determine-deployment-branch.outputs.NAME }}. Check the Github Actions Workflow logs for more details
-
       - name: Push to QA Branch
         if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
         id: push-current-branch-to-qa-branch
         run: |
-          gh pr checkout ${{github.event.issue.number}}
+          gh pr checkout $PR_NUMBER
 
           CURRENT_BRANCH=$(git branch --show-current)
           QA_BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
@@ -63,19 +61,20 @@ jobs:
             echo "can't force push to main"
             exit 1
           fi
-
           echo "pushing $CURRENT_BRANCH to $QA_BRANCH"
 
           git push --force origin "$CURRENT_BRANCH":"$QA_BRANCH"
-      - name: Successful Comment
+      - name: Create Successful Comment
         if: success()
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            I have pushed this branch successfully to ${{ steps.determine-deployment-branch.outputs.NAME }}. Check CI build logs for more details
-      - name: Failure Comment
+        run: |
+            BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
+            BODY="I have pushed this branch successfully to $BRANCH. Check CI build logs for more details"
+
+            gh issue comment $PR_NUMBER --body $BODY
+      - name: Add Failure Comment
         if: failure()
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            I could not push this branch to ${{ steps.determine-deployment-branch.outputs.NAME }}. Check the Github Actions Workflow logs for more details
+        run: |
+            BRANCH="${{ steps.determine-deployment-branch.outputs.NAME }}"
+            BODY="I could not push this branch to $BRANCH. Check the [Workflow log]($WORKFLOW_LINK) for more details
+
+            gh issue comment $PR_NUMBER --body $BODY
