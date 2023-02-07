@@ -7,7 +7,7 @@ permissions:
   pull-requests: write
 jobs:
   send-branch-to-qa:
-    if: ${{ startsWith(github.event.comment.body, '/deploy qa') && github.event.issue.pull_request }}
+    if: startsWith(github.event.comment.body, '/deploy qa') && github.event.issue.pull_request
     runs-on: ubuntu-latest
     env:
       PR_NUMBER: ${{github.event.issue.number}}
@@ -30,13 +30,14 @@ jobs:
             echo "NAME=" >> $GITHUB_OUTPUT
           fi
       - name: Unable to Determine Determine Branch
-        if: ${{ steps.determine-deployment-branch.outputs.NAME == '' }}
+        id: unable-to-determine-deployment-branch-comment
+        if: steps.determine-deployment-branch.outputs.NAME == ''
         run: |
             BODY="Unable to determine branch to deploy. Check the [Workflow log]($WORKFLOW_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - uses: actions/github-script@v4
-        if: ${{ steps.determine-deployment-branch.outputs.NAME == '' }}
+        if: steps.determine-deployment-branch.outputs.NAME == ''
         with:
           script: |
             const {owner, repo} = context.issue
@@ -47,7 +48,7 @@ jobs:
               content: "-1",
             });
       - uses: actions/github-script@v4
-        if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
+        if: steps.determine-deployment-branch.outputs.NAME != ''
         with:
           script: |
             const {owner, repo} = context.issue
@@ -58,7 +59,7 @@ jobs:
               content: "+1",
             });
       - name: Push to QA Branch
-        if: ${{ steps.determine-deployment-branch.outputs.NAME != '' }}
+        if: steps.determine-deployment-branch.outputs.NAME != ''
         id: push-current-branch-to-qa-branch
         run: |
           gh pr checkout $PR_NUMBER
@@ -81,18 +82,20 @@ jobs:
       - name: debugging
         run: |
           echo "push-current-branch-to-qa-branch outcome: ${{steps.push-current-branch-to-qa-branch.outcome}}"
+          echo "SUCCESS?: ${{steps.push-current-branch-to-qa-branch.outcome == 'success'}}"
+          echo "FAILURE?: ${{steps.push-current-branch-to-qa-branch.outcome == 'failure'}}"
       - name: Create Successful Comment
-        if: ${{steps.push-current-branch-to-qa-branch.outcome}} == 'success'
+        if: ${{steps.push-current-branch-to-qa-branch.outcome == 'success'}}
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
-            echo ${{steps.push-current-branch-to-qa-branch.outcome}}
+            echo ${{ steps.push-current-branch-to-qa-branch.outcome }}
             CI_LINK="${CI_LINK}?branch=${BRANCH}"
             BODY="I have pushed this branch successfully to $BRANCH. Check [CI build logs]($CI_LINK) for more details"
 
             gh issue comment $PR_NUMBER --body "$BODY"
       - name: Add Failure Comment
-        if: ${{steps.push-current-branch-to-qa-branch.outcome}} == 'failure'
+        if: ${{steps.push-current-branch-to-qa-branch.outcome == 'failure'}}
         env:
           BRANCH: ${{ steps.determine-deployment-branch.outputs.NAME }}
         run: |
